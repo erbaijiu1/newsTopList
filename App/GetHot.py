@@ -4,11 +4,15 @@ from models import Block,Hot
 import aiohttp
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from fake_useragent import UserAgent
+from App import db, app
 
 threadpool=ThreadPoolExecutor(100)
 
+
 class CrawlData:
     def __init__(self):
+        ua = UserAgent()
         self.urls={
             'V3EX':'https://www.v2ex.com/?tab=hot',
             'Github':'https://github.com/trending',
@@ -16,7 +20,8 @@ class CrawlData:
             'ZhiHu':'https://www.zhihu.com/hot',
         }
         self.headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
+            'User-Agent': ua.random,
+            # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
         }
 
     async def getConn(self,name):
@@ -24,7 +29,8 @@ class CrawlData:
         async with aiohttp.ClientSession(headers=self.headers)as session:
             async with session.get(url)as resp:
                 if resp.status==200:
-                    soup=etree.HTML(await resp.text())
+                    text = await resp.text()
+                    soup=etree.HTML(text)
                     return soup
                 else:
                     print('获取{}失败'.format(name))
@@ -100,12 +106,13 @@ def ExecGetData(spider,value):
     dataType=getattr(spider,"Get"+value)
     return dataType
 
+
 def main():
     allData=[
-        'Github',
-         'WeiBo',
-         'V3EX',
-         'ZhiHu'
+        # 'Github',
+         'WeiBo'
+        #,  'V3EX'
+        #,  'ZhiHu'
     ]
     loop = asyncio.get_event_loop()
     print("开始抓取{}种数据类型".format(len(allData)))
@@ -119,5 +126,8 @@ def main():
     loop.run_until_complete(asyncio.gather(*tasks))
     loop.close()
 
+
 if __name__ == '__main__':
-    main()
+    with app.app_context():
+        main()
+        pass
