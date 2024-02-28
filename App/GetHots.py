@@ -304,7 +304,7 @@ class CrawlData:
                             'desc': _v['desc'],
                             'pic': _v['img'],
                             'url': _v['url'],
-                            'hot': f"{round(_v['hotScore'] / 10000, 1)}万",
+                            'hot': f"{round(int(_v['hotScore']) / 10000, 1)}万",
                             'mobilUrl': _v['appUrl']
                         })
                 return {
@@ -320,29 +320,23 @@ class CrawlData:
             return {'success': False, 'message': '请求失败'}
 
 
-def main():
-    allData=[
-        # 'Github',
-         'WeiBo'
-        #,  'V3EX'
-        #,  'ZhiHu'
-    ]
-    # loop = asyncio.get_event_loop()
-    # print("开始抓取{}种数据类型".format(len(allData)))
-    # spider = CrawlData()
-    # tasks=[]
-    # for _,value in enumerate(allData):
-    #     print("开始抓取"+value)
-    #     Block.addBlock(value)
-    #     func=ExecGetData(spider,value)
-    #     tasks.append(func())
-    # loop.run_until_complete(asyncio.gather(*tasks))
-    # loop.close()
-
-
 if __name__ == '__main__':
+    method_list = ['douyin', 'zhihu_hot', 'wbresou', 'sspai', 'csdn', 'baike_history', 'bilibili_rankall', 'bilibili_hot', 'baiduredian']
     with app.app_context():
         cd = CrawlData()
-        data = cd.bilibili_hot()
-        print(data)
+        for method_name in method_list:
+            method = getattr(cd, method_name, None)
+            if method:
+                data = method()
+                print("======================")
+                print(data)
+        # data = cd.douyin()
+        # data = cd.zhihu_hot()
+        # data = cd.wbresou()
+        # data = cd.sspai()
+        # data = cd.csdn()
+        # data = cd.baike_history()
+        # data = cd.bilibili_rankall()
+        # data = cd.bilibili_hot()
+        # data = cd.baiduredian()
 
